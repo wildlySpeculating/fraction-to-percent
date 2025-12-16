@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Percent → Fractions</title>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+      /* Light theme defaults */
+      :root {
+        --bg: #f6f7fb;
+        --surface: #ffffff;
+        --surface2: #f2f4f8;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+
+        /* vertical rhythm scale */
+        --s1: 6px;
+        --s2: 10px;
+        --s3: 14px;
+        --s4: 18px;
+
+        --focus: rgba(99, 102, 241, 0.75);
+      }
+
+      /* Dark theme overrides */
+      body.dark {
+        --bg: #0b1220;
+        --surface: #0f172a;
+        --surface2: #111c35;
+        --text: #e5e7eb;
+        --muted: #94a3b8;
+        --border: #1f2a44;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+
+        --focus: rgba(129, 140, 248, 0.85);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: var(--s4);
+      }
+
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        padding: var(--s2) 0 var(--s3);
+        background: var(--bg);
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 16px;
+        padding: var(--s3);
+        box-shadow: var(--shadow);
+      }
+
+      h1 {
+        font-size: 1.05rem;
+        margin: 0;
+        letter-spacing: 0.2px;
+        line-height: 1.2;
+      }
+
+      .controls {
+        margin-top: var(--s3);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--s2);
+        flex-wrap: wrap;
+      }
+
+      input {
+        padding: 0.62rem 0.8rem;
+        font-size: 1rem;
+        width: 280px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface2);
+        color: var(--text);
+        outline: none;
+        box-shadow: var(--shadow);
+      }
+
+      /* Visible, consistent focus rings */
+      input:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 2px;
+      }
+
+      button {
+        font: inherit;
+        color: inherit;
+      }
+
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.58rem 0.8rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface2);
+        cursor: pointer;
+        user-select: none;
+        box-shadow: var(--shadow);
+      }
+
+      .toggleDot {
+        width: 34px;
+        height: 20px;
+        border-radius: 999px;
+        background: var(--border);
+        position: relative;
+        flex: 0 0 auto;
+      }
+
+      .toggleDot::after {
+        content: '';
+        width: 16px;
+        height: 16px;
+        border-radius: 999px;
+        background: var(--surface);
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        transition: transform 120ms ease;
+        box-shadow: var(--shadow);
+      }
+
+      .toggleDot.on::after {
+        transform: translateX(14px);
+      }
+
+      .results {
+        margin-top: var(--s3);
+        display: grid;
+        gap: var(--s2);
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: var(--s3);
+        box-shadow: var(--shadow);
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: var(--s2);
+        align-items: start;
+      }
+
+      @media (max-width: 520px) {
+        .card {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .main {
+        font-weight: 750;
+        font-size: 1.1rem;
+        line-height: 1.15;
+      }
+
+      .variants {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 10px;
+        padding: 0.44rem 0.62rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface2);
+        cursor: pointer;
+      }
+
+      .pill:active {
+        transform: translateY(0.5px);
+      }
+
+      .pct {
+        min-width: 4ch;
+        text-align: right;
+        opacity: 0.95;
+        color: var(--muted);
+      }
+
+      /* red outline for left (minus) */
+      .pill.minus {
+        border-color: rgba(239, 68, 68, 0.55);
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.14) inset;
+      }
+
+      /* green outline for right (plus) */
+      .pill.plus {
+        border-color: rgba(34, 197, 94, 0.55);
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.14) inset;
+      }
+
+      .status {
+        margin-top: var(--s3);
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 0.55rem 0.75rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+
+  <!-- Dark by default -->
+  <body class="dark">
+    <div id="root"></div>
+
+    <script type="text/babel">
+      // Use your full map here
+      const percentToFractionMap = {
+        16.7: ['1/6', '2/12', '3/18'],
+        33.3: ['2/6', '3/9', '4/12'],
+        '50.0': ['3/6', '4/8', '5/10'],
+      }
+
+      const parseFraction = (s) => {
+        const m = /^(\d+)\s*\/\s*(\d+)$/.exec(String(s).trim())
+        if (!m) return null
+        const n = Number(m[1])
+        const d = Number(m[2])
+        if (!Number.isInteger(n) || !Number.isInteger(d) || d === 0) return null
+        return { n, d }
+      }
+
+      const fmt = (n, d) => `${n}/${d}`
+      const pct = (n, d) => ((n / d) * 100).toFixed(1)
+
+      function App() {
+        const [value, setValue] = React.useState('')
+
+        // Dark by default; localStorage overrides if user has toggled before.
+        const [dark, setDark] = React.useState(() => {
+          const saved = localStorage.getItem('demo_dark')
+          if (saved === '1') return true
+          if (saved === '0') return false
+          return true
+        })
+
+        const [toast, setToast] = React.useState(null)
+        const toastTimer = React.useRef(null)
+        const inputRef = React.useRef(null)
+
+        React.useEffect(() => {
+          document.body.classList.toggle('dark', dark)
+          localStorage.setItem('demo_dark', dark ? '1' : '0')
+        }, [dark])
+
+        // keyboard polish: autofocus input on load
+        React.useEffect(() => {
+          inputRef.current?.focus()
+        }, [])
+
+        const entered = React.useMemo(() => {
+          const trimmed = value.trim()
+          if (trimmed === '') return { kind: 'empty' }
+          const num = Number(trimmed)
+          if (!Number.isFinite(num)) return { kind: 'invalid' }
+          return { kind: 'number', num }
+        }, [value])
+
+        const matches = React.useMemo(() => {
+          if (entered.kind !== 'number') return null
+          const key = entered.num.toFixed(1)
+          const arr = percentToFractionMap[key]
+          return Array.isArray(arr) ? arr : null
+        }, [entered])
+
+        const showToast = React.useCallback((msg) => {
+          setToast(msg)
+          if (toastTimer.current) clearTimeout(toastTimer.current)
+          toastTimer.current = setTimeout(() => setToast(null), 1100)
+        }, [])
+
+        const copy = React.useCallback(
+          async (text) => {
+            try {
+              await navigator.clipboard.writeText(text)
+              showToast(`Copied ${text}`)
+            } catch {
+              showToast('Copy failed')
+            }
+          },
+          [showToast],
+        )
+
+        return (
+          <div className="container">
+            <div className="topbar">
+              <div className="panel">
+                <h1>Percent → Fractions</h1>
+
+                <div className="controls">
+                  <input ref={inputRef} type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Enter a percent e.g. 16.7" value={value} onChange={(e) => setValue(e.target.value)} />
+
+                  <button type="button" className="toggle" role="switch" aria-checked={dark} onClick={() => setDark((d) => !d)}>
+                    <span className={'toggleDot ' + (dark ? 'on' : '')} aria-hidden="true" />
+                    <span>Dark mode</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {matches ? (
+              <div className="results" role="list">
+                {matches.map((fraction) => {
+                  const parsed = parseFraction(fraction)
+                  if (!parsed) return null
+
+                  const { n, d } = parsed
+                  const minus = { n: n - 1, d: d - 1 }
+                  const plus = { n: n + 1, d: d + 1 }
+
+                  const minusValid = minus.n >= 0 && minus.d > 0
+                  const plusValid = plus.n >= 0 && plus.d > 0
+
+                  return (
+                    <div className="card" key={fraction} role="listitem">
+                      <div className="main mono">{fmt(n, d)}</div>
+
+                      <div className="variants">
+                        {minusValid && (
+                          <button type="button" className="pill minus" onClick={() => copy(fmt(minus.n, minus.d))} aria-label={`Copy ${fmt(minus.n, minus.d)}`}>
+                            <span className="mono">{fmt(minus.n, minus.d)}</span>
+                            <span className="mono pct">({pct(minus.n, minus.d)})</span>
+                          </button>
+                        )}
+
+                        {plusValid && (
+                          <button type="button" className="pill plus" onClick={() => copy(fmt(plus.n, plus.d))} aria-label={`Copy ${fmt(plus.n, plus.d)}`}>
+                            <span className="mono">{fmt(plus.n, plus.d)}</span>
+                            <span className="mono pct">({pct(plus.n, plus.d)})</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="status">
+                {entered.kind === 'empty' && 'Type a percent to see matches.'}
+                {entered.kind === 'invalid' && 'Only numbers are allowed.'}
+                {entered.kind === 'number' && `No matches for ${entered.num.toFixed(1)}.`}
+              </div>
+            )}
+
+            {toast && (
+              <div className="toast" role="status" aria-live="polite">
+                {toast}
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+    </script>
+  </body>
+</html>
