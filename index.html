@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
 
-    <!-- Critical for mobile scaling -->
+    <!-- ✅ Critical for iOS: prevents "zoomed out tiny UI" -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
     <title>Percent → Fractions</title>
 
-    <!-- PWA / iOS installability -->
+    <!-- ✅ PWA / iOS installability -->
     <link rel="manifest" href="./manifest.webmanifest" />
     <meta name="theme-color" content="#0b1220" />
 
@@ -31,10 +31,12 @@
         --border: #e5e7eb;
         --shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 
+        /* rhythm */
         --s1: 8px;
         --s2: 12px;
         --s3: 16px;
         --s4: 20px;
+        --s5: 28px;
 
         --focus: rgba(99, 102, 241, 0.75);
       }
@@ -55,11 +57,17 @@
         box-sizing: border-box;
       }
 
+      html,
+      body {
+        height: 100%;
+      }
+
       body {
         margin: 0;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
         background: var(--bg);
         color: var(--text);
+
         padding: max(var(--s4), env(safe-area-inset-top)) max(var(--s3), env(safe-area-inset-right)) max(var(--s4), env(safe-area-inset-bottom)) max(var(--s3), env(safe-area-inset-left));
       }
 
@@ -72,8 +80,8 @@
         position: sticky;
         top: 0;
         z-index: 10;
+        padding: var(--s2) 0 var(--s3);
         background: var(--bg);
-        padding-bottom: var(--s3);
       }
 
       .panel {
@@ -94,25 +102,22 @@
       h1 {
         font-size: 1.05rem;
         margin: 0;
-        line-height: 1.2;
         letter-spacing: 0.2px;
-        white-space: nowrap;
-      }
-
-      .controls {
-        margin-top: var(--s3);
+        line-height: 1.2;
+        text-wrap: nowrap;
       }
 
       input {
-        width: min(420px, 100%);
         padding: 0.72rem 0.9rem;
         font-size: 1.05rem;
+        width: min(420px, 100%);
         border-radius: 14px;
         border: 1px solid var(--border);
         background: var(--surface2);
         color: var(--text);
         outline: none;
         box-shadow: var(--shadow);
+        margin-top: var(--s3);
       }
 
       input:focus-visible,
@@ -124,7 +129,6 @@
       button {
         font: inherit;
         color: inherit;
-        cursor: pointer;
       }
 
       .toggle {
@@ -135,8 +139,9 @@
         border-radius: 14px;
         border: 1px solid var(--border);
         background: var(--surface2);
-        box-shadow: var(--shadow);
+        cursor: pointer;
         user-select: none;
+        box-shadow: var(--shadow);
       }
 
       .toggleDot {
@@ -145,17 +150,18 @@
         border-radius: 999px;
         background: var(--border);
         position: relative;
+        flex: 0 0 auto;
       }
 
       .toggleDot::after {
         content: '';
-        position: absolute;
-        top: 2px;
-        left: 2px;
         width: 18px;
         height: 18px;
         border-radius: 999px;
         background: var(--surface);
+        position: absolute;
+        top: 2px;
+        left: 2px;
         transition: transform 120ms ease;
         box-shadow: var(--shadow);
       }
@@ -176,62 +182,71 @@
         border-radius: 16px;
         padding: var(--s3);
         box-shadow: var(--shadow);
+
         display: grid;
         grid-template-columns: 170px 1fr;
         gap: var(--s2);
+        align-items: start;
       }
 
       @media (max-width: 640px) {
         .card {
           grid-template-columns: 1fr;
+          gap: var(--s2);
         }
       }
 
       .mono {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
       }
 
       .main {
-        font-size: 1.2rem;
         font-weight: 800;
+        font-size: 1.2rem;
+        line-height: 1.15;
       }
 
       .variants {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
+        align-items: center;
       }
 
       .pill {
         display: inline-flex;
+        align-items: baseline;
         gap: 10px;
         padding: 0.55rem 0.75rem;
         border-radius: 999px;
         border: 1px solid var(--border);
         background: var(--surface2);
-      }
-
-      .pill.minus {
-        border-color: rgba(239, 68, 68, 0.55);
-        box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.14);
-      }
-
-      .pill.plus {
-        border-color: rgba(34, 197, 94, 0.55);
-        box-shadow: inset 0 0 0 2px rgba(34, 197, 94, 0.14);
+        touch-action: manipulation;
       }
 
       .pct {
         min-width: 4.2ch;
         text-align: right;
+        opacity: 0.95;
         color: var(--muted);
+      }
+
+      .pill.minus {
+        border-color: rgba(239, 68, 68, 0.55);
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.14) inset;
+      }
+
+      .pill.plus {
+        border-color: rgba(34, 197, 94, 0.55);
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.14) inset;
       }
 
       .status {
         margin-top: var(--s3);
         color: var(--muted);
+        font-size: 0.98rem;
       }
     </style>
   </head>
@@ -240,7 +255,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-      // 🔁 SHORTENED MAP — replace with full version later
+      // Shortened map for chat — replace with your full original map.
       const percentToFractionMap = {
         16.7: ['1/6', '2/12', '3/18', '4/24', '5/30', '6/36', '7/42', '8/48', '9/54', '10/60', '11/66'],
         33.3: ['2/6', '3/9', '4/12', '5/15', '6/18', '7/21', '8/24', '9/27', '10/30', '11/33', '12/36', '13/39', '14/42', '15/45', '16/48', '17/51', '18/54', '19/57', '20/60', '21/63', '22/66', '23/69'],
@@ -1099,79 +1114,71 @@
         98.6: ['68/69'],
       }
 
-      const stripLeadingZeros = (s) => String(s).replace(/^0+(?=\d)/, '')
-
+      // Canonicalize keys so "08.3" and "8.3" both match.
       const canonicalPercentMap = (() => {
         const out = Object.create(null)
         for (const [k, v] of Object.entries(percentToFractionMap)) {
-          const ks = String(k).trim()
-          if (ks.includes('.')) {
-            const num = Number(ks)
-            if (!Number.isFinite(num)) continue
-            out[num.toFixed(1)] = v
-          } else {
-            out[stripLeadingZeros(ks)] = v
-          }
+          const num = Number(k)
+          if (!Number.isFinite(num)) continue
+          out[num.toFixed(1)] = v
         }
         return out
       })()
 
-      const normalizeTypedPercent = (raw) => {
-        const s = String(raw ?? '')
-          .trim()
-          .replace(',', '.')
-        if (s === '') return null
-        if (!/^\d+(\.\d+)?$/.test(s)) return null
-
-        if (s.includes('.')) {
-          const num = Number(s)
-          if (!Number.isFinite(num)) return null
-          return num.toFixed(1)
-        }
-
-        return stripLeadingZeros(s)
-      }
-
-      // ✅ Only allow at most 1 digit after the decimal, plus:
-      // - allow empty string
-      // - allow trailing decimal "12."
-      // - allow leading zeros in the decimal case (e.g. "08.3")
-      const clampToOneDecimal = (raw) => {
-        let s = String(raw ?? '').replace(',', '.') // treat comma as decimal
-        // remove spaces
-        s = s.replace(/\s+/g, '')
-
-        // keep only digits and a single dot
-        s = s.replace(/[^\d.]/g, '')
-        const firstDot = s.indexOf('.')
-        if (firstDot !== -1) {
-          // drop any additional dots
-          s = s.slice(0, firstDot + 1) + s.slice(firstDot + 1).replace(/\./g, '')
-          // keep only one digit after the dot
-          s = s.slice(0, firstDot + 2 + 0) // dot + 1 digit
-          // The above slice is slightly opaque; do it explicitly:
-          // s = s.slice(0, firstDot + 1) + s.slice(firstDot + 1, firstDot + 2);
-          s = s.slice(0, firstDot + 1) + s.slice(firstDot + 1, firstDot + 2)
-        }
-        return s
-      }
-
       const parseFraction = (s) => {
-        const m = /^(\d+)\/(\d+)$/.exec(String(s))
+        const m = /^(\d+)\s*\/\s*(\d+)$/.exec(String(s).trim())
         if (!m) return null
-        return { n: Number(m[1]), d: Number(m[2]) }
+        const n = Number(m[1])
+        const d = Number(m[2])
+        if (!Number.isInteger(n) || !Number.isInteger(d) || d === 0) return null
+        return { n, d }
       }
 
       const fmt = (n, d) => `${n}/${d}`
       const pct = (n, d) => ((n / d) * 100).toFixed(1)
 
+      // Normalizes typed input so:
+      // - "28" => "28.0"
+      // - "08.3" => "8.3"
+      // - "7.7" => "7.7"
+      const normalizeTypedPercent = (raw) => {
+        const trimmed = String(raw ?? '').trim()
+        if (trimmed === '') return null
+
+        // Allow only digits + at most one dot while typing
+        if (!/^\d*\.?\d*$/.test(trimmed)) return null
+
+        const num = Number(trimmed)
+        if (!Number.isFinite(num)) return null
+        return num.toFixed(1)
+      }
+
+      const parseEnteredNumber = (raw) => {
+        if (raw == null || String(raw).trim() === '') return null
+        const num = Number(raw)
+        return Number.isFinite(num) ? num : null
+      }
+
       function App() {
         const [value, setValue] = React.useState('')
-        const [dark, setDark] = React.useState(true)
+
+        const [dark, setDark] = React.useState(() => {
+          const saved = localStorage.getItem('demo_dark')
+          if (saved === '1') return true
+          if (saved === '0') return false
+          return true
+        })
+
+        const inputRef = React.useRef(null)
 
         React.useEffect(() => {
           document.body.classList.toggle('dark', dark)
+          localStorage.setItem('demo_dark', dark ? '1' : '0')
         }, [dark])
+
+        React.useEffect(() => {
+          inputRef.current?.focus()
+        }, [])
 
         const matches = React.useMemo(() => {
           const key = normalizeTypedPercent(value)
@@ -1180,53 +1187,52 @@
           return Array.isArray(arr) ? arr : null
         }, [value])
 
-        const onChange = (e) => {
-          const next = clampToOneDecimal(e.target.value)
-          setValue(next)
-        }
-
         return (
           <div className="container">
             <div className="topbar">
               <div className="panel">
                 <div className="headerRow">
                   <h1>Percent → Fractions</h1>
-                  <button className="toggle" onClick={() => setDark((d) => !d)}>
-                    <span className={'toggleDot ' + (dark ? 'on' : '')} />
-                    Dark mode
+                  <button type="button" className="toggle" role="switch" aria-checked={dark} onClick={() => setDark((d) => !d)}>
+                    <span className={'toggleDot ' + (dark ? 'on' : '')} aria-hidden="true" />
+                    <span className="textNowrap">Dark mode</span>
                   </button>
                 </div>
 
-                <div className="controls">
-                  <input type="text" inputMode="decimal" placeholder="Enter a percent e.g. 16.7" value={value} onChange={onChange} />
-                </div>
+                <input ref={inputRef} type="text" inputMode="decimal" placeholder="Enter a percent e.g. 16.7" value={value} onChange={(e) => setValue(e.target.value)} />
               </div>
             </div>
 
             {matches ? (
-              <div className="results">
+              <div className="results" role="list">
                 {matches.map((f) => {
                   const p = parseFraction(f)
                   if (!p) return null
 
-                  const minus = { n: p.n - 1, d: p.d - 1 }
-                  const plus = { n: p.n + 1, d: p.d + 1 }
+                  const minusN = p.n - 1
+                  const minusD = p.d - 1
+                  const plusN = p.n + 1
+                  const plusD = p.d + 1
 
-                  const minusValid = minus.n >= 0 && minus.d > 0
-                  const plusValid = plus.n >= 0 && plus.d > 0
+                  const minusValid = minusN >= 0 && minusD > 0
+                  const plusValid = plusN >= 0 && plusD > 0
 
                   return (
-                    <div className="card" key={f}>
+                    <div className="card" key={f} role="listitem">
                       <div className="main mono">{f}</div>
+
                       <div className="variants">
                         {minusValid && (
                           <div className="pill minus mono">
-                            {fmt(minus.n, minus.d)} <span className="pct">({pct(minus.n, minus.d)})</span>
+                            {fmt(minusN, minusD)}
+                            <span className="pct">({pct(minusN, minusD)})</span>
                           </div>
                         )}
+
                         {plusValid && (
                           <div className="pill plus mono">
-                            {fmt(plus.n, plus.d)} <span className="pct">({pct(plus.n, plus.d)})</span>
+                            {fmt(plusN, plusD)}
+                            <span className="pct">({pct(plusN, plusD)})</span>
                           </div>
                         )}
                       </div>
@@ -1235,7 +1241,13 @@
                 })}
               </div>
             ) : (
-              <div className="status">Type a percent to see matches.</div>
+              (() => {
+                const entered = parseEnteredNumber(value)
+                if (entered == null) {
+                  return <div className="status">Type a percent to see matches.</div>
+                }
+                return <div className="status">No matches for {entered.toFixed(1)}.</div>
+              })()
             )}
           </div>
         )
