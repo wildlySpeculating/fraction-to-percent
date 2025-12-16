@@ -2,17 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- ✅ Critical for iOS: prevents "zoomed out tiny UI" -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
     <title>Percent → Fractions</title>
 
+    <!-- ✅ PWA / iOS installability -->
     <link rel="manifest" href="./manifest.webmanifest" />
     <meta name="theme-color" content="#0b1220" />
 
-    <!-- iOS Home Screen (Add to Home Screen) -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Fractions" />
-
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -27,10 +31,12 @@
         --border: #e5e7eb;
         --shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 
-        --s1: 6px;
-        --s2: 10px;
-        --s3: 14px;
-        --s4: 18px;
+        /* rhythm */
+        --s1: 8px;
+        --s2: 12px;
+        --s3: 16px;
+        --s4: 20px;
+        --s5: 28px;
 
         --focus: rgba(99, 102, 241, 0.75);
       }
@@ -51,16 +57,22 @@
         box-sizing: border-box;
       }
 
+      html,
+      body {
+        height: 100%;
+      }
+
       body {
         margin: 0;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
         background: var(--bg);
         color: var(--text);
-        padding: var(--s4);
+
+        padding: max(var(--s4), env(safe-area-inset-top)) max(var(--s3), env(safe-area-inset-right)) max(var(--s4), env(safe-area-inset-bottom)) max(var(--s3), env(safe-area-inset-left));
       }
 
       .container {
-        max-width: 860px;
+        max-width: 920px;
         margin: 0 auto;
       }
 
@@ -80,27 +92,52 @@
         box-shadow: var(--shadow);
       }
 
+      .headerRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--s2);
+      }
+
       h1 {
         font-size: 1.05rem;
         margin: 0;
         letter-spacing: 0.2px;
         line-height: 1.2;
+        text-wrap: nowrap;
       }
 
-      .controls {
+      /* .controls {
         margin-top: var(--s3);
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: var(--s2);
         flex-wrap: wrap;
+      } */
+
+      .controls {
+        margin-top: var(--s3);
+      }
+
+      /* ✅ On narrow screens, stack and put toggle ABOVE input */
+      @media (max-width: 640px) {
+        .controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .controls > .toggle {
+          order: -1;
+          align-self: flex-start;
+        }
       }
 
       input {
-        padding: 0.62rem 0.8rem;
-        font-size: 1rem;
-        width: 280px;
-        border-radius: 12px;
+        padding: 0.72rem 0.9rem;
+        font-size: 1.05rem;
+        width: min(420px, 100%);
+        border-radius: 14px;
         border: 1px solid var(--border);
         background: var(--surface2);
         color: var(--text);
@@ -123,8 +160,8 @@
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        padding: 0.58rem 0.8rem;
-        border-radius: 12px;
+        padding: 0.7rem 0.9rem;
+        border-radius: 14px;
         border: 1px solid var(--border);
         background: var(--surface2);
         cursor: pointer;
@@ -133,8 +170,8 @@
       }
 
       .toggleDot {
-        width: 34px;
-        height: 20px;
+        width: 38px;
+        height: 22px;
         border-radius: 999px;
         background: var(--border);
         position: relative;
@@ -143,8 +180,8 @@
 
       .toggleDot::after {
         content: '';
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
         border-radius: 999px;
         background: var(--surface);
         position: absolute;
@@ -155,7 +192,7 @@
       }
 
       .toggleDot.on::after {
-        transform: translateX(14px);
+        transform: translateX(16px);
       }
 
       .results {
@@ -170,15 +207,17 @@
         border-radius: 16px;
         padding: var(--s3);
         box-shadow: var(--shadow);
+
         display: grid;
-        grid-template-columns: 160px 1fr;
+        grid-template-columns: 170px 1fr;
         gap: var(--s2);
         align-items: start;
       }
 
-      @media (max-width: 520px) {
+      @media (max-width: 640px) {
         .card {
           grid-template-columns: 1fr;
+          gap: var(--s2);
         }
       }
 
@@ -189,8 +228,8 @@
       }
 
       .main {
-        font-weight: 750;
-        font-size: 1.1rem;
+        font-weight: 800;
+        font-size: 1.2rem;
         line-height: 1.15;
       }
 
@@ -205,11 +244,12 @@
         display: inline-flex;
         align-items: baseline;
         gap: 10px;
-        padding: 0.44rem 0.62rem;
+        padding: 0.55rem 0.75rem;
         border-radius: 999px;
         border: 1px solid var(--border);
         background: var(--surface2);
         cursor: pointer;
+        touch-action: manipulation;
       }
 
       .pill:active {
@@ -217,7 +257,7 @@
       }
 
       .pct {
-        min-width: 4ch;
+        min-width: 4.2ch;
         text-align: right;
         opacity: 0.95;
         color: var(--muted);
@@ -236,26 +276,25 @@
       .status {
         margin-top: var(--s3);
         color: var(--muted);
-        font-size: 0.92rem;
+        font-size: 0.98rem;
       }
 
       .toast {
         position: fixed;
         left: 50%;
-        bottom: 18px;
+        bottom: calc(16px + env(safe-area-inset-bottom));
         transform: translateX(-50%);
         background: var(--surface);
         border: 1px solid var(--border);
         color: var(--text);
-        padding: 0.55rem 0.75rem;
-        border-radius: 12px;
+        padding: 0.65rem 0.85rem;
+        border-radius: 14px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-        font-size: 0.9rem;
+        font-size: 0.95rem;
       }
     </style>
   </head>
 
-  <!-- Dark by default -->
   <body class="dark">
     <div id="root"></div>
 
@@ -1119,7 +1158,7 @@
         98.6: ['68/69'],
       }
 
-      // Canonicalize all keys once so "08.3" and "8.3" both match.
+      // Canonicalize keys so "08.3" and "8.3" both match.
       const canonicalPercentMap = (() => {
         const out = Object.create(null)
         for (const [k, v] of Object.entries(percentToFractionMap)) {
@@ -1145,7 +1184,6 @@
       function App() {
         const [value, setValue] = React.useState('')
 
-        // Dark by default; localStorage overrides if user has toggled before.
         const [dark, setDark] = React.useState(() => {
           const saved = localStorage.getItem('demo_dark')
           if (saved === '1') return true
@@ -1176,7 +1214,7 @@
 
         const matches = React.useMemo(() => {
           if (entered.kind !== 'number') return null
-          const key = entered.num.toFixed(1) // normalizes "08.3" => "8.3"
+          const key = entered.num.toFixed(1)
           const arr = canonicalPercentMap[key]
           return Array.isArray(arr) ? arr : null
         }, [entered])
@@ -1203,15 +1241,15 @@
           <div className="container">
             <div className="topbar">
               <div className="panel">
-                <h1>Percent → Fractions</h1>
-
-                <div className="controls">
-                  <input ref={inputRef} type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Enter a percent e.g. 16.7" value={value} onChange={(e) => setValue(e.target.value)} />
-
+                <div className="headerRow">
+                  <h1>Percent → Fractions</h1>
                   <button type="button" className="toggle" role="switch" aria-checked={dark} onClick={() => setDark((d) => !d)}>
                     <span className={'toggleDot ' + (dark ? 'on' : '')} aria-hidden="true" />
-                    <span>Dark mode</span>
+                    <span className="textNowrap">Dark mode</span>
                   </button>
+                </div>
+                <div className="controls">
+                  <input ref={inputRef} type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Enter a percent e.g. 16.7" value={value} onChange={(e) => setValue(e.target.value)} />
                 </div>
               </div>
             </div>
